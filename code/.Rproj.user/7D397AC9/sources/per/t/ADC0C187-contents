@@ -1,0 +1,137 @@
+rm(list = ls())
+library(phangorn)
+library(phytools)
+library(castor)
+#---------------------------------------------------------------------------------------
+#ER order
+ER_order <- matrix(c(0,1,0, 1,0,1, 0,1,0),3,3,byrow=TRUE,
+                   dimnames=list(c("a","b","c"),c("a","b","c")))
+#ER unorder
+ER_unorder <- matrix(c(0,1,1, 1,0,1, 1,1,0),3,3,byrow=TRUE,
+                     dimnames=list(c("a","b","c"),c("a","b","c")))
+#ER incorrect order
+#only a to c  b to c
+ER_incorder <- matrix(c(0,0,1, 0,0,1, 1,1,0),3,3,byrow=TRUE,
+                      dimnames=list(c("a","b","c"),c("a","b","c")))
+#only a to b  c to b
+#ER_incorder2 <- matrix(c(0,1,0, 0,0,0, 0,1,0),3,3,byrow=TRUE,
+                  #    dimnames=list(c("a","b","c"),c("a","b","c")))
+#only b to a c to a
+#ER_incorder3 <- matrix(c(0,0,0, 1,0,0, 1,0,0),3,3,byrow=TRUE,
+                   #   dimnames=list(c("a","b","c"),c("a","b","c")))
+
+ARD_order <- matrix(c(0,1,0, 2,0,3, 0,4,0),3,3,byrow=TRUE,
+                    dimnames=list(c("a","b","c"),c("a","b","c")))
+
+ARD_unorder <- matrix(c(0,1,2, 3,0,4, 5,6,0),3,3,byrow=TRUE,
+                 dimnames=list(c("a","b","c"),c("a","b","c")))
+
+ARD_incorder <- matrix(c(0,0,1, 0,0,2, 3,4,0),3,3,byrow=TRUE,
+                  dimnames=list(c("a","b","c"),c("a","b","c")))
+
+SYM_order <- matrix(c(0,1,0, 1,0,2, 0,2,0),3,3,byrow=TRUE,
+                                   dimnames=list(c("a","b","c"),c("a","b","c")))
+    
+SYM_unorder <- matrix(c(0,1,2, 1,0,3, 2,3,0),3,3,byrow=TRUE,
+                        dimnames=list(c("a","b","c"),c("a","b","c")))
+    
+SYM_incorder <- matrix(c(0,0,1, 0,0,2, 1,2,0),3,3,byrow=TRUE,
+                        dimnames=list(c("a","b","c"),c("a","b","c")))
+
+#---------------------------------------------------------------------------------------
+
+
+
+
+#---------------------------------------------------------------------------------------
+#Calculate the accuracy of each ASR model by compare node_states from Step 1 and Step 2
+accuracy <- function(x){
+  acc <- 0
+  for (i in 1:nrow(x)) {
+    acc <- acc + x[i,node_states[i]]
+  }
+  acc <- acc/nrow(x)
+}
+#---------------------------------------------------------------------------------------
+
+
+
+
+#---------------------------------------------------------------------------------------
+load('tree.Rdata')
+alltree <- c(t32_sym,t32_asym,t64_sym,t64_asym,t128_sym,t128_asym,t256_sym,t256_asym,t512_sym,t512_asym)
+all_tree_tips <- c('32','32','64','64','128','128','256','256','512','512')
+all_tree_types <- c('sym','asym','sym','asym','sym','asym','sym','asym','sym','asym')
+
+all_data <- as.data.frame(matrix(nrow=0,ncol=12))
+colnames(all_data) <- c('ER_order','ER_un','ER_inc','pars_order','pars_un','pars_inc','ARD_order','ARD_un','ARD_inc','SYM_order','SYM_un','SYM_inc') 
+d1 <- as.data.frame(matrix(nrow = 2000,ncol = 2))
+colnames(d1) <- c('tree_tips','tree_type')
+
+
+#---------------------------------------------------------------------------------------
+
+
+#---------------------------------------------------------------------------------------
+for (i in 1:length(alltree)) {
+  tree <- alltree[[i]]
+        
+  n <- 0
+  m <- matrix(nrow=0,ncol=12)
+  colnames(m) <- c('ER_order','ER_un','ER_inc','pars_order','pars_un','pars_inc','ARD_order','ARD_un','ARD_inc','SYM_order','SYM_un','SYM_inc') 
+  while(n<200){
+    Q <- get_random_mk_transition_matrix(3, rate_model=ER_order, max_rate=0.5)
+    E <- simulate_mk_model(tree, Q)
+    tip_states <- E$tip_states
+    node_states <- E$node_states
+    #如果缺少某一个state或者min的值小于0.1
+    filt_1 <- min(table(tip_states)/length(tip_states))
+    filt_2 <- dim(table(tip_states))
+    if (filt_1 <0.05 | filt_2 < 3)
+      next
+    n <- n+1
+    
+    results_ER_order <-  asr_mk_model(tree, tip_states, 3, rate_model=ER_order, Ntrials=2)
+    results_ER_unorder <-  asr_mk_model(tree, tip_states, 3, rate_model=ER_unorder, Ntrials=2)
+    results_ER_incorder <-  asr_mk_model(tree, tip_states, 3, rate_model=ER_incorder, Ntrials=2)
+    results_pars_order <- asr_max_parsimony(tree, tip_states, 3, transition_costs = "sequential")
+    results_pars_unorder <- asr_max_parsimony(tree, tip_states, 3,transition_costs = ER_unorder)
+    results_pars_incorder <- asr_max_parsimony(tree, tip_states, 3, transition_costs = ER_incorder)
+    results_ARD_order <-  asr_mk_model(tree, tip_states, 3, rate_model=ARD_order, Ntrials=2)
+    results_ARD_unorder <-  asr_mk_model(tree, tip_states, 3, rate_model=ARD_unorder, Ntrials=2)
+    results_ARD_incorder <-  asr_mk_model(tree, tip_states, 3, rate_model=ARD_incorder, Ntrials=2)
+    results_SYM_order <-  asr_mk_model(tree, tip_states, 3, rate_model=SYM_order, Ntrials=2)
+    results_SYM_unorder <-  asr_mk_model(tree, tip_states, 3, rate_model=SYM_unorder, Ntrials=2)
+    results_SYM_incorder <-  asr_mk_model(tree, tip_states, 3, rate_model=SYM_incorder, Ntrials=2)
+
+     
+    acc_ER_order <- accuracy(results_ER_order$ancestral_likelihoods)
+    acc_ER_unorder <- accuracy(results_ER_unorder$ancestral_likelihoods)
+    acc_ER_incorder <- accuracy(results_ER_incorder$ancestral_likelihoods)
+    acc_pars_order <- accuracy(results_pars_order$ancestral_likelihoods)
+    acc_pars_unorder <- accuracy(results_pars_unorder$ancestral_likelihoods)
+    acc_pars_incorder <- accuracy(results_pars_incorder$ancestral_likelihoods)
+    acc_ARD_order <- accuracy(results_ARD_order$ancestral_likelihoods)
+    acc_ARD_unorder <- accuracy(results_ARD_unorder$ancestral_likelihoods)
+    acc_ARD_incorder <- accuracy(results_ARD_incorder$ancestral_likelihoods)
+    acc_SYM_order <- accuracy(results_SYM_order$ancestral_likelihoods)
+    acc_SYM_unorder <- accuracy(results_SYM_unorder$ancestral_likelihoods)
+    acc_SYM_incorder <- accuracy(results_SYM_incorder$ancestral_likelihoods)
+    
+    
+    x <-c(acc_ER_order, acc_ER_unorder, acc_ER_incorder, acc_pars_order, acc_pars_unorder, acc_pars_incorder,acc_ARD_order, acc_ARD_unorder, acc_ARD_incorder,acc_SYM_order, acc_SYM_unorder, acc_SYM_incorder)
+    m <- rbind(m,x)
+  }
+  all_data <- rbind(all_data,m)
+  d1$tree_tips[(200*i-199):(200*i)] <- all_tree_tips[i]
+  d1$tree_type[(200*i-199):(200*i)] <- all_tree_types[i]
+  
+}
+#---------------------------------------------------------------------------------------
+
+all_data1 <- cbind(all_data,d1)
+data <- all_data1
+
+save(data,all_data,d1,file = 'final1.Rdata')
+
+

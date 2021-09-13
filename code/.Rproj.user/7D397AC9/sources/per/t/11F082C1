@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1625221479847.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3479217977",
+    "id" : "11F082C1",
+    "lastKnownWriteTime" : 1625221632,
+    "last_content_update" : 1625221632459,
+    "path" : "~/Desktop/ASR/code/plot_low_high_rate_compare.R",
+    "project_path" : "plot_low_high_rate_compare.R",
+    "properties" : {
+        "cursorPosition" : "12,0",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

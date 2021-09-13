@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1625186786014.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2991376890",
+    "id" : "CF90158F",
+    "lastKnownWriteTime" : 1623178621,
+    "last_content_update" : 1623178621,
+    "path" : "~/Desktop/ASR/code/Q_0.66.R",
+    "project_path" : "Q_0.66.R",
+    "properties" : {
+        "cursorPosition" : "93,37",
+        "scrollLine" : "80"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

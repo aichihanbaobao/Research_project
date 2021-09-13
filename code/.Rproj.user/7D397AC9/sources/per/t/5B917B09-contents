@@ -1,0 +1,108 @@
+rm(list=ls())
+library(ape)
+library(paleotree)
+library(phytools)
+#because the raw .tree file can not be read, so have to transfer it to .nexus by figtree app
+tree <- read.nexus("/Users/Eagle/Desktop/ASR/经验数据/41586_2020_2100_MOESM3_ESM/2.nex")
+char <- read.nexus.data("/Users/Eagle/Desktop/ASR/经验数据/41586_2020_2100_MOESM3_ESM/m.nex")
+plot(tree)
+
+#去掉outgroup
+
+is.rooted(tree)
+# get outgroup node label
+outgroup <- which(tree$tip.label == "Youngolepis")
+
+# find the edge leading to the outgroup
+root.edge <- which(tree$edge[,2] == outgroup)
+
+#root tree half way along root edge
+tree_rooted <- reroot(tree, outgroup, position = (tree$edge.length[[root.edge]]/ 2))
+is.rooted(tree_rooted)
+plot(tree_rooted)
+
+tree <- tree_rooted
+
+#开始验证tips名字和character数据集的名字的顺序是否一样
+char <- t(as.data.frame(char))
+char <- as.data.frame(char)
+
+identical(tree$tip.label,rownames(char))
+char <- char[match(tree$tip.label,rownames(char)),]
+identical(tree$tip.label,rownames(char))
+
+#矫正branchlength？Time scale the tree using the timePaleoPhy()
+
+#tree1 <- timePaleoPhy(tree_rooted)
+
+#开始映射
+char_data <- char[,10]#因为表格已经被矢量化了
+names(char_data) <- rownames(char)
+char_data
+
+#做个树看看
+eco.plot.cols <- setNames(c("blue","green","red","grey"),c(0,1,2,"?")) 
+dotTree(tree, char_data, colors=eco.plot.cols)
+
+
+#编辑不同的模型
+ER_order <- matrix(c(0,1,0, 1,0,1, 0,1,0),3,3,byrow=TRUE,
+                   dimnames=list(c(0,1,2),c(0,1,2)))
+
+ER_unorder <- matrix(c(0,1,1, 1,0,1, 1,1,0),3,3,byrow=TRUE,
+                     dimnames=list(c(0,1,2),c(0,1,2)))
+
+ER_incorder <- matrix(c(0,0,1, 0,0,1, 1,1,0),3,3,byrow=TRUE,
+                      dimnames=list(c(0,1,2),c(0,1,2)))
+
+ARD_order <- matrix(c(0,1,0, 2,0,3, 0,4,0),3,3,byrow=TRUE,
+                    dimnames=list(c(0,1,2),c(0,1,2)))
+
+ARD_unorder <- matrix(c(0,1,2, 3,0,4, 5,6,0),3,3,byrow=TRUE,
+                      dimnames=list(c(0,1,2),c(0,1,2)))
+
+ARD_incorder <- matrix(c(0,0,1, 0,0,2, 3,4,0),3,3,byrow=TRUE,
+                       dimnames=list(c(0,1,2),c(0,1,2)))
+
+SYM_order <- matrix(c(0,1,0, 1,0,2, 0,2,0),3,3,byrow=TRUE,
+                    dimnames=list(c(0,1,2),c(0,1,2)))
+
+SYM_unorder <- matrix(c(0,1,2, 1,0,3, 2,3,0),3,3,byrow=TRUE,
+                      dimnames=list(c(0,1,2),c(0,1,2)))
+
+SYM_incorder <- matrix(c(0,0,1, 0,0,2, 1,2,0),3,3,byrow=TRUE,
+                       dimnames=list(c(0,1,2),c(0,1,2)))
+
+#获取tipstates
+
+x<-structure(c(0,1,1,1,0,0,0,0.33,0,0,0.33,0,0.33,0.33,0,0,0,0,0,0,0,0.33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.33,1,0,0,0,0,1,1,0.33,0,0,0.33,0,0.33,0.33,0,0,0,0,0,0,0,0.33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.33,0,0,0,0,1,0,0,0.33,1,1,0.33,1,0.33,0.33,1,1,1,1,1,1,1,0.33,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0.33), .Dim = c(42L,3L), .Dimnames = list(rownames(char), c(0,1,2)))
+#进行ASR预测最终祖先的性状，并进行比较分析
+results_ER_order <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model = ER_order,Ntrials = 2)
+results_ER_unorder <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model=ER_unorder, Ntrials=2)
+results_ER_incorder <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model=ER_incorder, Ntrials=2)
+#results_pars_order <- asr_max_parsimony(tree,tip_states = NULL,tip_priors = x,transition_costs = "sequential")
+#results_pars_unorder <- asr_max_parsimony(tree, tip_states = NULL,tip_priors = x,transition_costs = ER_unorder)
+#results_pars_incorder <- asr_max_parsimony(tree,tip_states = NULL,tip_priors = x,transition_costs = ER_incorder)
+results_ARD_order <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model=ARD_order, Ntrials=2)
+results_ARD_unorder <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model=ARD_unorder, Ntrials=2)
+results_ARD_incorder <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model=ARD_incorder, Ntrials=2)
+results_SYM_order <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model=SYM_order, Ntrials=2)
+results_SYM_unorder <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model=SYM_unorder, Ntrials=2)
+results_SYM_incorder <-  asr_mk_model(tree,tip_states = NULL,tip_priors = x,rate_model=SYM_incorder, Ntrials=2)
+
+
+ans_state_ER_order <- results_ER_order$ancestral_likelihoods[41,]
+ans_state_ER_unorder <- results_ER_unorder$ancestral_likelihoods[41,]
+ans_state_ER_incorder <- results_ER_incorder$ancestral_likelihoods[41,]
+ans_state_ARD_order <- results_ARD_order$ancestral_likelihoods[41,]
+ans_state_ARD_unorder <- results_ARD_unorder$ancestral_likelihoods[41,]
+ans_state_ARD_incorder <- results_ARD_incorder$ancestral_likelihoods[41,]
+ans_state_SYM_order <- results_SYM_order$ancestral_likelihoods[41,]
+ans_state_SYM_unorder <- results_SYM_unorder$ancestral_likelihoods[41,]
+ans_state_SYM_incorder <- results_SYM_incorder$ancestral_likelihoods[41,]
+
+all_results <- rbind(ans_state_ER_order,ans_state_ER_unorder,ans_state_ER_incorder,ans_state_ARD_order,ans_state_ARD_unorder,ans_state_ARD_incorder,ans_state_SYM_order,ans_state_SYM_unorder,ans_state_SYM_incorder)
+rownames(all_results)  <- c('ER_order','ER_un','ER_inc','ARD_order','ARD_un','ARD_inc','SYM_order','SYM_un','SYM_inc')
+all_results <-round(all_results,4)
+library(pheatmap)
+pheatmap(all_results,display_numbers = TRUE,number_color = "green")

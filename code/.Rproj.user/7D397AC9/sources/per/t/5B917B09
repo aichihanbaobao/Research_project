@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1624888629899.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1384640326",
+    "id" : "5B917B09",
+    "lastKnownWriteTime" : 1625221439,
+    "last_content_update" : 1625221439258,
+    "path" : "~/Desktop/ASR/code/ecode.R",
+    "project_path" : "ecode.R",
+    "properties" : {
+        "cursorPosition" : "0,0",
+        "scrollLine" : "0",
+        "source_window_id" : ""
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

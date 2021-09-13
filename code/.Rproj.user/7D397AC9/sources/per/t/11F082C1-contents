@@ -1,0 +1,70 @@
+#研究极高极低速率对于准确性的影响的差异
+
+# library
+rm(list=ls())
+library(ggridges)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(forcats)
+library(Rmisc)  
+library(ggpubr) 
+load('Rdata/final1.Rdata')
+#---------------------------------------------------------------------------------------
+data = as_tibble(data)
+#多一步整理数据
+data <- data %>%
+  gather(key = "text", value ="value",-tree_tips,-tree_type)
+#---------------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------------
+plot <- ggplot(data,aes(y=text, x=value,  fill=text)) +
+  geom_density_ridges(alpha=0.9, stat="binline", scale = 0.85, bins=20, size = 0.3, color = 'grey',draw_baseline = FALSE) +
+  theme_ridges(font_size = 10,line_size = 0.1) +
+  theme(
+    legend.position="none",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 10)
+    
+  ) +
+  theme_bw()+
+  scale_fill_viridis_d(guide = "colourbar")+
+  xlab(" ") +
+  ylab(" ")+
+  xlim(0.3,1.1)+
+  #facet_grid(tree_type ~ tree_tips )+
+  facet_grid(tree_type ~ factor(tree_tips, levels=c('32','64','128','256','512')))
+
+plot
+#---------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
